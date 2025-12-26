@@ -1,10 +1,22 @@
+'''
+Docstring for routers.blog_post
+
+#dictionary unpacking
+
+a = {"x": 1, "y": 2}
+b = {"z": 3, **a}
+{'z': 3, 'x': 1, 'y': 2}
+
+'''
+
+
 from urllib import response
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query ,Body
 from pydantic import BaseModel
 
 
 from enum import Enum
-from typing import Optional
+from typing import Optional,List
 
 from fastapi import FastAPI,status,Response
 
@@ -16,6 +28,13 @@ class BlogModel(BaseModel):
     title:str
     content:str
     published:Optional[bool]
+    
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
     
       
 @router.post('/new' #,status_code= status.HTTP_200_OK
@@ -35,21 +54,55 @@ def create_blog(blog: BlogModel,id:int,version:int = 1):
         
         }
 
-
 @router.post('/new/{id}/comment')
-def create_comment(blog:BlogModel,id:int,
-                   comment_id:int = Query(None,
+def create_comment(
+    id: int,
+    blog: BlogModel,
+    comment_id: int = Query(None,
                    title='Id of the  comment',
                    description='Description for comment_id',
                    alias='comment_Id',
-                   deprecated=True
-                   )
-   ):
+                   deprecated=True),
+    content: str = Body(
+        ...,
+        min_length=20,
+        regex="^[a-z\\s]+$" # allowed 
+    ),
+    v: Optional[List[str]] = Query(None)
+):
     return {
-        'blog':blog,
-        'id':id,
-        'comment_id':comment_id
+        "blog": blog,
+        "id": id,
+        "comment_id": comment_id,
+        "content": content,
+        "version": v
     }
+
+
+
+
+# @router.post('/new/{id}/comment')
+# def create_comment(blog:BlogModel,id:int,
+#                    comment_id:int = Query(None,
+#                    title='Id of the  comment',
+#                    description='Description for comment_id',
+#                    alias='comment_Id',
+#                    deprecated=True
+#                    ),
+#                    # Request----- Body(...) ----
+#                    content :str= Body(...,
+#                                       min_length=20,
+#                                       description=" this is request - body content ",
+#                                       regex="^$[a-z/s]"),
+#                    v:Optional[List[str]] = Query(None)
+#    ):
+#     return {
+#         'blog':blog,
+#         'id':id,
+#         'comment_id':comment_id,
+#         "content" :content,
+#         "version" : v
+#     }
 
 # def blog_post_id(id:int,response = Response):
 #     blogs =[]
