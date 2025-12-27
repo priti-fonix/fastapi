@@ -1,51 +1,49 @@
-from fastapi  import FastAPI
-from pydantic import BaseModel
-from typing import List
+from enum import Enum
+
+from fastapi import FastAPI,status,Response
+from routers import blog_routes,blog_post,user,article
+from db import models
+from db.database import engine
+
+
+#-------------------- predefined parameters ---------------//
+
 
 app = FastAPI()
-
-class  Tea(BaseModel):
-    id: int
-    name : str
-    origin: str
-    
-teas : list[Tea] = []
-
-@app.get("/")
-def read_root():
-    return {"message" : "welcome t o the chai charcha "}
+app.include_router(user.router)
+app.include_router(blog_routes.router)
+app.include_router(blog_post.router)
+app.include_router(article.router)
+@app.get("/hello")
+def get_welcome():
+    return {"message": "Hello world !"}
 
 
-@app.get("/teas")
-def add_tea():
-    # teas.(tea)
-    return teas
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
 
-#---------- apis --------------------------// 
-@app.post("/teas")
-def add_tea(tea:Tea):
-    teas.append(tea)
-    return tea
 
-#----------------- path parameters --------------//
-@app.put("/teas/{tea_id}")
-def update_tea(tea_id:int,updated_tea:Tea):
-    for index, tea in enumerate(teas):
-        if tea.id == tea_id:
-            teas[index] = updated_tea
-            return updated_tea
-        
-    return {"error" : "tea not found"}
+@app.get("/items/")
+async def read_item(skip: int = 0, limit: int = 10):
+    return fake_items_db[skip : skip + limit]
 
-@app.delete("/teas/{tea_id}")
-def delete_tea(tea_id:int):
-   for index, tea in enumerate(teas):
-        if tea.id == tea_id:
-           deleted_tea= tea.pop(index)
-           return deleted_tea
-        
-   return {"error":"tea not found"}       
-        
-    
 
-    
+# -----------------  creating table in db -------------//
+
+models.Base.metadata.create_all(engine)
+
+
+
+
+# @app.get("/models/{model_name}")
+# async def get_model(model_name: ModelName):
+#     if model_name is ModelName.alexnet:
+#         return {"model_name": model_name, "message": "Deep Learning FTW!"}
+
+#     if model_name.value == "lenet":
+#         return {"model_name": model_name, "message": "LeCNN all the images"}
+
+#     return {"model_name": model_name, "message": "Have some residuals"}
+
+
+# #----------------------------- query Parameters ------------------------------//
+
