@@ -2,6 +2,7 @@ from sqlalchemy.orm.session import Session
 from schema import UserBase
 from db.models import Dbuser
 from db.hash import Hash
+from fastapi import HTTPException
 
 def create_user(db:Session, request: UserBase):
     new_user = Dbuser(username =  request.username,
@@ -18,7 +19,10 @@ def get_all_users(db:Session):
     return db.query(Dbuser).all()
 
 def get_user(db:Session,id :int):
-    return db.query(Dbuser).filter(Dbuser.id == id).first()
+    user = db.query(Dbuser).filter(Dbuser.id == id).first()
+    
+    if not user: 
+        raise HTTPException(status_code=404, detail=f"user details with {id} not found")
 
 def update_user(db:Session, id: int, request:UserBase):
     user = db.query(Dbuser).filter(Dbuser.id == id)
@@ -34,7 +38,7 @@ def update_user(db:Session, id: int, request:UserBase):
 def delete_user(db:Session, id: int):
     user = db.query(Dbuser).filter(Dbuser.id == id).first()
     if not user:
-        from fastapi import HTTPException
+        
         raise HTTPException(status_code=404, detail="User not found")
     db.delete(user)
     db.commit()

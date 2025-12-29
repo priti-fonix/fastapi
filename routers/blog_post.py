@@ -12,7 +12,7 @@ b = {"z": 3, **a}
 
 from urllib import response
 from fastapi import APIRouter, Query ,Body,Path
-from pydantic import BaseModel
+from pydantic import BaseModel,ConfigDict
 
 
 from enum import Enum
