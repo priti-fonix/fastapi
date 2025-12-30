@@ -7,13 +7,14 @@ pwd_cxt = CryptContext(schemes=["argon2"], deprecated="auto")
 class Hash:
 
     @staticmethod
-    def bcrypt(password: str) -> str:
+    def create(password: str) -> str:
         # Truncate password to 72 bytes for bcrypt
-        password = password[:72]
+        # password = password[:72]
         return pwd_cxt.hash(password)
 
     @staticmethod
-    def verify(hashed_pass: str, plain_pass: str) -> bool:
+    def verify(plain_pass: str,hashed_pass: str) -> bool:
         # Truncate password to 72 bytes for bcrypt
-        plain_pass = plain_pass[:72]
-        return pwd_cxt.verify(hashed_pass, plain_pass)
+        # plain_pass = plain_pass[:72]
+        return pwd_cxt.verify(plain_pass, hashed_pass)
+
